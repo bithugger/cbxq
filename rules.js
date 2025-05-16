@@ -28,7 +28,7 @@ class Board {
 	}
 
 	spawnPieces(flip, player) {
-		let xor = (flip > 0) != (player > 0)
+		let xor = flip != player
 		let y1 = xor ? 10 : 1
 		let s = xor ? -1 : 1
 		let x1 = xor ? 1 : 9
@@ -37,57 +37,57 @@ class Board {
 
 		let side = flip ? 1 - player : player
 
-		let general = new General(player == 0 ? "将" : "帅", side, player, 5, y1)
+		let general = new General(player == 0 ? "将" : "帅", side, player)
 		this.spaces[i(5, y1)] = general
 
-		let guard_1 = new Guard(player == 0 ? "士" : "仕", side, player, 4, y1)
+		let guard_1 = new Guard(player == 0 ? "士" : "仕", side, player)
 		this.spaces[i(4, y1)] = guard_1
 
-		let guard_2 = new Guard(player == 0 ? "士" : "仕", side, player, 6, y1)
+		let guard_2 = new Guard(player == 0 ? "士" : "仕", side, player)
 		this.spaces[i(6, y1)] = guard_2
 
-		let elephant_1 = new Elephant(player == 0 ? "象" : "相", side, player, 3, y1)
+		let elephant_1 = new Elephant(player == 0 ? "象" : "相", side, player)
 		this.spaces[i(3, y1)] = elephant_1
 
-		let elephant_2 = new Elephant(player == 0 ? "象" : "相", side, player, 7, y1)
+		let elephant_2 = new Elephant(player == 0 ? "象" : "相", side, player)
 		this.spaces[i(7, y1)] = elephant_2
 
 		if (manchurian) {
-			let banner = new Banner("旗", side, player, x1, y1)
+			let banner = new Banner("旗", side, player)
 			this.spaces[i(x1, y1)] = banner
 		} else {
-			let horse_1 = new Horse("马", side, player, 2, y1)
+			let horse_1 = new Horse("马", side, player)
 			this.spaces[i(2, y1)] = horse_1
 
-			let horse_2 = new Horse("马", side, player, 8, y1)
+			let horse_2 = new Horse("马", side, player)
 			this.spaces[i(8, y1)] = horse_2
 
-			let chariot_1 = new Chariot("车", side, player, 1, y1)
+			let chariot_1 = new Chariot("车", side, player)
 			this.spaces[i(1, y1)] = chariot_1
 
-			let chariot_2 = new Chariot("车", side, player, 9, y1)
+			let chariot_2 = new Chariot("车", side, player)
 			this.spaces[i(9, y1)] = chariot_2
 
-			let cannon_1 = new Cannon(player == 0 ? "包" : "炮", side, player, 2, y1 + 2 * s)
+			let cannon_1 = new Cannon(player == 0 ? "包" : "炮", side, player)
 			this.spaces[i(2, y1 + 2 * s)] = cannon_1
 
-			let cannon_2 = new Cannon(player == 0 ? "包" : "炮", side, player, 8, y1 + 2 * s)
+			let cannon_2 = new Cannon(player == 0 ? "包" : "炮", side, player)
 			this.spaces[i(8, y1 + 2 * s)] = cannon_2
 		}
 		
-		let soldier_1 = new Soldier(player == 0 ? "卒" : "兵", side, player, 1, y1 + 3 * s)
+		let soldier_1 = new Soldier(player == 0 ? "卒" : "兵", side, player)
 		this.spaces[i(1, y1 + 3 * s)] = soldier_1
 
-		let soldier_2 = new Soldier(player == 0 ? "卒" : "兵", side, player, 3, y1 + 3 * s)
+		let soldier_2 = new Soldier(player == 0 ? "卒" : "兵", side, player)
 		this.spaces[i(3, y1 + 3 * s)] = soldier_2
 
-		let soldier_3 = new Soldier(player == 0 ? "卒" : "兵", side, player, 5, y1 + 3 * s)
+		let soldier_3 = new Soldier(player == 0 ? "卒" : "兵", side, player)
 		this.spaces[i(5, y1 + 3 * s)] = soldier_3
 
-		let soldier_4 = new Soldier(player == 0 ? "卒" : "兵", side, player, 7, y1 + 3 * s)
+		let soldier_4 = new Soldier(player == 0 ? "卒" : "兵", side, player)
 		this.spaces[i(7, y1 + 3 * s)] = soldier_4
 
-		let soldier_5 = new Soldier(player == 0 ? "卒" : "兵", side, player, 9, y1 + 3 * s)
+		let soldier_5 = new Soldier(player == 0 ? "卒" : "兵", side, player)
 		this.spaces[i(9, y1 + 3 * s)] = soldier_5
 	}
 
@@ -542,8 +542,8 @@ function getPiecesGivingCheckTo(player, board) {
 					}
 					// check the spaces immediately in front of the general
 					if (x == general_pos.x && (
-						(y == general_pos.y - 1 && player == 0)
-						|| (y == general_pos.y + 1 && player == 1)
+						(y == general_pos.y - 1 && p.side == 0)
+						|| (y == general_pos.y + 1 && p.side == 1)
 					)) {
 						pieces_giving_check.push({ x: x, y: y })
 					}
