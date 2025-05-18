@@ -16,6 +16,17 @@ function coords(i) {
 	return {x: (i % 9) + 1, y: Math.floor(i / 9) + 1}
 }
 
+const ZOBRIST_TABLE = [
+	[], [], [], [], [], [], [], [],
+	[], [], [], [], [], [], [], []
+]
+
+for (let a = 0; a < ZOBRIST_TABLE.length; a++) {
+	for (let b = 0; b < 90; b++) {
+		ZOBRIST_TABLE[a][b] = Math.floor(Math.random() * 2**62)
+	}
+}
+
 class Board {
 	constructor() {
 		this.spaces = new Array(90)
@@ -115,13 +126,13 @@ class Board {
 		this.spaces[i(9, y1 + 3 * s)] = soldier_5
 	}
 
-	hash() {
-		let hash = 0
+	hash(player_to_move) {
+		let hash = player_to_move
 
 		for (let i = 0; i < this.spaces.length; i++) {
 			let p = this.spaces[i]
 			if (p instanceof Piece) {
-				hash ^= p.hash() << (47*i % 59)
+				hash ^= ZOBRIST_TABLE[p.hash()][i]
 			}
 		}
 

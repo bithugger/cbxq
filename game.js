@@ -57,12 +57,12 @@ function makeMove(player) {
 		// play it
 		animateMove(move.from, move.to, board, () => {
 			drawBoard(board)
-			
+
 			// when move animation finishes, it's the other players turn
 			player_turn = 1 - player
 
 			// update the map of board positions reached
-			let board_hash = board.hash()
+			let board_hash = board.hash(player_turn)
 			times_board_position_reached.set(board_hash, (times_board_position_reached.get(board_hash) || 0) + 1)
 
 			// make the move and check if the game continues
@@ -118,7 +118,7 @@ function* generateMovesOfPlayer(player, board) {
 			if (!currently_in_check) {
 				// check for the 3x repetition rule
 				let new_board = board.afterMove(i(x, y), dest)
-				let new_board_hash = new_board.hash()
+				let new_board_hash = new_board.hash(1 - player)
 				
 				let times_reached = times_board_position_reached.get(new_board_hash) || 0
 				if (times_reached >= 2) {
