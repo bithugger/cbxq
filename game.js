@@ -51,11 +51,13 @@ function makeMove(player) {
 	let move = player_turn == 0 ? blackPlayerMove(board, all_moves) : whitePlayerMove(board, all_moves)
 
 	// make sure the returned move is among the legal ones
-	let legal_move = move && all_moves.find(m => m.from.x == move.from.x && m.from.y == move.from.y && m.to.x == move.to.x && m.to.y == move.to.y)
+	let legal_move = move && all_moves.find(m => m.from == move.from && m.to == move.to)
 
 	if (move && legal_move) {
 		// play it
 		animateMove(move.from, move.to, board, () => {
+			drawBoard(board)
+			
 			// when move animation finishes, it's the other players turn
 			player_turn = 1 - player
 
@@ -74,8 +76,10 @@ function makeMove(player) {
 		})
 	} else {
 		if (move) {
-			let piece = board.at(move.from.x, move.from.y)
-			console.log(piece.color + " " + piece.symbol + " (" + move.from.x + "," + move.from.y + ") --> (" + move.to.x + "," + move.to.y + ") is not legal")
+			let from = coords(move.from)
+			let to = coords(move.to)
+			let piece = board.at(from.x, from.y)
+			console.log(piece.color + " " + piece.symbol + " (" + from.x + "," + from.y + ") --> (" + to.x + "," + to.y + ") is not legal")
 		}
 		manual_input = true
 	}
@@ -86,34 +90,43 @@ function makeMove(player) {
 // -------------------------------------------------------------------------------
 
 function* generateMovesOfPlayer(player, board) {
-	let currently_in_check = getPiecesGivingCheckTo(player, board).length > 0
+	let currently_in_check = isInCheck(player, board)
 
+	const pieces_locations = []
 	for (let x = 1; x <= 9; x++) {
 		for (let y = 1; y <= 10; y++) {
 			let p = board.at(x, y)
 			if (p instanceof Piece && p.color == player) {
-				let move_generator = p.legalMoves(x, y, board)
-
-				let next_move = move_generator.next()
-				while (!next_move.done) {
-					let dest = next_move.value
-					next_move = move_generator.next()
-
-					// disallow board position repetitions unless it is to escape a check
-					if (!currently_in_check) {
-						// check for the 3x repetition rule
-						let new_board = board.afterMove({ from: { x: x, y: y }, to: dest })
-						let new_board_hash = new_board.hash()
-						
-						let times_reached = times_board_position_reached.get(new_board_hash) || 0
-						if (times_reached >= 2) {
-							continue
-						}
-					}
-
-					yield { from: { x: x, y: y }, to: dest }
+				if(p instanceof Chariot || p instanceof Cannon || p instanceof Horse || p instanceof Banner) {
+					pieces_locations.unshift({x, y})
+				} else {
+					pieces_locations.push({x, y})
 				}
 			}
+		}
+	}
+
+	for (let {x, y} of pieces_locations) {
+		let p = board.at(x, y)
+		let move_generator = p.legalMoves(x, y, board)
+		let next_move = move_generator.next()
+		while (!next_move.done) {
+			let dest = next_move.value
+			next_move = move_generator.next()
+
+			// disallow board position repetitions unless it is to escape a check
+			if (!currently_in_check) {
+				// check for the 3x repetition rule
+				let new_board = board.afterMove(i(x, y), dest)
+				let new_board_hash = new_board.hash()
+				
+				let times_reached = times_board_position_reached.get(new_board_hash) || 0
+				if (times_reached >= 2) {
+					continue
+				}
+			}
+
+			yield { from: i(x, y), to: dest }
 		}
 	}
 }

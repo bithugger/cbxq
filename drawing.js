@@ -159,9 +159,7 @@ function touchOrMouseUp(mx, my){
 
 		if(x >= 1 && x <= 9 && y >= 1 && y <= 10){
 			if(acceptMove(focused_pos, {x, y}, board)){
-				// board[i(x, y)] = focused_piece
-				// board[i(focused_pos.x, focused_pos.y)] = undefined
-				board = board.afterMove({ from: focused_pos, to: { x, y } })
+				board = board.afterMove(i(focused_pos.x, focused_pos.y), i(x, y))
 				player_turn = 1 - player_turn
 				
 				// make the move and check if the game continues
@@ -376,7 +374,7 @@ function drawBoard(b){
 	drawScores()
 	
 	// highlights
-	let checking_pieces = [getPiecesGivingCheckTo(0, b), getPiecesGivingCheckTo(1, b)]
+	let checking_pieces = [getAllPiecesGivingCheckTo(0, b), getAllPiecesGivingCheckTo(1, b)]
 	
 	for(let x = 1; x <= 9; x++){
 		for(let y = 1; y <= 10; y++){
@@ -386,7 +384,8 @@ function drawBoard(b){
 					
 					let giving_check = false
 					for(let cp of checking_pieces[1 - p.color]){
-						if(cp.x == x && cp.y == y){
+						let cp_pos = coords(cp)
+						if(cp_pos.x == x && cp_pos.y == y){
 							giving_check = true
 							break
 						}
@@ -456,14 +455,14 @@ function drawPieceOverlay(x, y, piece){
 // ------------------------------------------------------------------------------------
 
 let move_animation_frames_remaining = -2
-let move_target = { x: 0, y: 0 }
-let move_source = { x: 0, y: 0 }
+let move_target = 0
+let move_source = 0
 let moving_piece
 let move_animation_complete_callback
 
 function animateMove(from, to, board, callback){
 	move_animation_frames_remaining = move_animation_frames
-	moving_piece = board.at(from.x, from.y)
+	moving_piece = board.spaces[from]
 	move_source = from
 	move_target = to
 	move_animation_complete_callback = callback
@@ -497,7 +496,8 @@ function draw() {
 			let py = y - mouse_press_rem.y
 
 			let moves = focused_piece.legalMoves(focused_pos.x, focused_pos.y, board)
-			for(let mm of moves){
+			for(let m of moves){
+				let mm = coords(m)
 				let thick = Math.round(px) == mm.x && Math.round(py) == mm.y
 				drawMoveMarker(mm.x, mm.y, thick)
 			}
@@ -507,14 +507,16 @@ function draw() {
 	}else{
 		if(move_animation_frames_remaining >= 0){
 			let t = smoothstep(move_animation_frames_remaining / move_animation_frames)
-			let px = move_source.x * t + move_target.x * (1 - t)
-			let py = move_source.y * t + move_target.y * (1 - t)
+			let from = coords(move_source)
+			let to = coords(move_target)
+			let px = from.x * t + to.x * (1 - t)
+			let py = from.y * t + to.y * (1 - t)
 			drawPieceOverlay(px, py, moving_piece)
 			move_animation_frames_remaining -= 1
 		}else if(move_animation_frames_remaining == -1){
-			board = board.afterMove({ from: move_source, to: move_target })
-			move_source = { x: 0, y: 0 }
-			move_target = { x: 0, y: 0 }
+			board = board.afterMove(move_source, move_target)
+			move_source = 0
+			move_target = 0
 			moving_piece = undefined
 			move_animation_frames_remaining = -2
 			drawBoard(board)
