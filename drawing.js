@@ -1,6 +1,10 @@
 let font
 function preload(){
-	font = loadFont('KNYuanmo-Regular.ttf')
+	try {
+		font = loadFont('KNYuanmo-Regular.ttf')
+	} catch (error) {
+		font = loadFont('https://cdn.jsdelivr.net/gh/bithugger/cbxq/KNYuanmo-Regular.ttf')
+	}
 }
 
 const piece_colors = [
@@ -161,15 +165,16 @@ function touchOrMouseUp(mx, my){
 			if(acceptMove(focused_pos, {x, y}, board)){
 				board = board.afterMove(i(focused_pos.x, focused_pos.y), i(x, y))
 				player_turn = 1 - player_turn
-				
-				// make the move and check if the game continues
-				if(!makeMove(player_turn, board)){
-					drawBoard(board)
-					// game over, start new game after a brief pause
-					setTimeout(() => {
-						newGame()
-					}, 5000)
-				}
+
+				setTimeout(() => {
+					// make the move and check if the game continues
+					if(!makeMove(player_turn, board)){
+						// game over, start new game after a brief pause
+						setTimeout(() => {
+							newGame()
+						}, 5000)
+					}
+				}, 50)
 			}
 		}
 		
@@ -454,7 +459,7 @@ function drawPieceOverlay(x, y, piece){
 
 // ------------------------------------------------------------------------------------
 
-let move_animation_frames_remaining = -2
+let move_animation_frames_remaining = -1
 let move_target = 0
 let move_source = 0
 let moving_piece
@@ -513,15 +518,18 @@ function draw() {
 			let py = from.y * t + to.y * (1 - t)
 			drawPieceOverlay(px, py, moving_piece)
 			move_animation_frames_remaining -= 1
-		}else if(move_animation_frames_remaining == -1){
-			board = board.afterMove(move_source, move_target)
-			move_source = 0
-			move_target = 0
-			moving_piece = undefined
-			move_animation_frames_remaining = -2
-			drawBoard(board)
-			move_animation_complete_callback()
-			drawBoard(board)
+
+			if(move_animation_frames_remaining < 0){
+				board = board.afterMove(move_source, move_target)
+				move_source = 0
+				move_target = 0
+				moving_piece = undefined
+				drawBoard(board)
+
+				setTimeout(() => {
+					move_animation_complete_callback()
+				}, 25)
+			}
 		}
 	}
 	

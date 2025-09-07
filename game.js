@@ -56,8 +56,6 @@ function makeMove(player) {
 	if (move && legal_move) {
 		// play it
 		animateMove(move.from, move.to, board, () => {
-			drawBoard(board)
-
 			// when move animation finishes, it's the other players turn
 			player_turn = 1 - player
 
@@ -68,6 +66,7 @@ function makeMove(player) {
 			// make the move and check if the game continues
 			if (!makeMove(player_turn)) {
 				drawBoard(board)
+				
 				// game over, start new game after a brief pause
 				setTimeout(() => {
 					newGame()
