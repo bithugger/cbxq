@@ -1,10 +1,7 @@
 let font
 function preload(){
-	try {
-		font = loadFont('KNYuanmo-Regular.ttf')
-	} catch (error) {
-		font = loadFont('https://cdn.jsdelivr.net/gh/bithugger/cbxq/KNYuanmo-Regular.ttf')
-	}
+	// font = loadFont('KNYuanmo-Regular.ttf')
+	font = loadFont('https://cdn.jsdelivr.net/gh/bithugger/cbxq/KNYuanmo-Regular.ttf')
 }
 
 const piece_colors = [
